@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap demo</title>
+    <link href="style.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  </head>
+  <body>
+    <header>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary fixed-top"style="background-color: #e3f2fd;" data-bs-theme="light">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">
+      <img src="nextbg.png" alt="Logo" height="30" class="d-inline-block align-text-top">
+    </a>
+    <!-- <a class="navbar-brand" href="#">NEXT</a> -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="index.html">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="tools.html">Tools</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="price.html">Pricing</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="about.html">About us</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+</header>
+
+<main>
+    <div class="sharing-container">
+    <div class="cardbtn">
+    <div class="sending-container" id="sender-box" data-bs-theme="light"> 
+      <h2 id="send-txt">send</h2>
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-upload" id="plus-icon" viewBox="0 0 16 16">
+  <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/>
+  <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708z"/>
+</svg>
+      <input id="fileInput" type="file" /> 
+
+           <!-- second page -->
+
+  <div id="uploaderInfo">
+        <div id="otp-d" style="display: flex; flex-direction: row; gap:10px"><h2>OTP:</h2> <h2><strong id="otpDisplay"></strong></h2></div>
+        <p><small>OTP expires in <span id="otpTimer">5:00</span></small></p>
+        <div style="margin-top:6px;">Status: <span id="uploaderStatus">Waiting for receiver...</span></div>
+        <div style="margin-top:8px;">
+          <div id="progress" style="width:300px; height:14px; background:#ddd; border-radius:8px; overflow:hidden;"><div id="bar" style="width:0%; height:100%; background:#2196F3; border-radius:8px;"></div></div>
+          <small id="progressText"></small>
+        </div>
+      </div>
+
+    </div>
+  <button class="btn btn-primary" id="createBtn" type="button">Create OTP & Room</button>        
+  <button class="btn btn-primary" id="sendBtn" type="button">Send File</button>
+</div>
+   
+  <div class="cardbtn">
+  <div class="receiver-container" id="receiver-box">
+  <h2 id="reciver-txt">receiver</h2>
+   <input type="text" id="otpInput" class="form-control w-75 placeholderr" placeholder="Enter 4-digit OTP" maxlength="4">
+    <div id="receiverInfo" style="margin-top:10px; margin-left: 10px; display: none;">
+          <div>Status: <span id="receiverStatus">Not connected</span></div>
+        <div id="fileReceive" style="margin-top:8px;"></div>
+        <div id="recvProgress" style="margin-top:8px; display:none;">
+          <div id="recvBar" style="width:0%; height:14px; background:#2196F3; border-radius:8px; max-width:300px;"></div>
+          <small id="recvProgressText"></small>
+        </div>
+        </div>
+  </div>
+  <button class="btn btn-primary" id="joinBtn" type="button">Join</button>
+ </div>
+</div>
+</main>
+
+<footer>
+      <div class="bottom-footer">
+        <p><b>To contact Developer</b></p>
+        <p>&copy; Developed by <a href="https://www.instagram.com/next_webapps/?utm_source=ig_web_button_share_sheet"><b id="bl">Vardhan Chougale</b></a> </p>
+      </div>
+</footer>
+
+   <script src="/socket.io/socket.io.js"></script>
+   <script>
+   const socket = io(); // connect to same origin (localhost)
+
+
+   const createBtn = document.getElementById('createBtn');
+   const sendBtn = document.getElementById('sendBtn');
+   const plus = document.getElementById('plus-icon');
+   const sendTxt = document.getElementById('send-txt');
+   const uploaderInfo = document.getElementById('uploaderInfo');
+
+
+    // Add click event to the image
+    plus.addEventListener('click', function () {
+      document.getElementById('fileInput').click(); // Trigger the file input
+    });
+
+    createBtn.addEventListener('click', function () {
+    plus.style.display = "none";
+    sendTxt.style.display = "none";
+    createBtn.style.display = "none";
+    sendBtn.style.display = "flex";
+    uploaderInfo.style.display = "flex";
+   })
+
+   const fileInput = document.getElementById("fileInput");
+   const otpDisplay = document.getElementById("otpDisplay");
+      const uploaderStatus = document.getElementById("uploaderStatus");
+      const progressBar = document.getElementById("bar");
+      const progressText = document.getElementById("progressText");
+
+      // Receiver elements
+      const joinBtn = document.getElementById("joinBtn");
+      const otpInput = document.getElementById("otpInput");
+      const receiverInfo = document.getElementById("receiverInfo");
+      const receiverStatus = document.getElementById("receiverStatus");
+      const fileReceive = document.getElementById("fileReceive");
+      const recvProgress = document.getElementById("recvProgress");
+      const recvBar = document.getElementById("recvBar");
+      const recvProgressText = document.getElementById("recvProgressText");
+
+      let currentRoom = null;
+      let isUploader = false;
+      let CHUNK_SIZE = 64 * 1024; // 64KB default chunk size on client side
+
+      createBtn.onclick = () => {
+        socket.emit("create-room");
+      };
+
+      socket.on("room-created", ({ otp }) => {
+       isUploader = true;
+       currentRoom = otp;
+       otpDisplay.textContent = otp;
+       uploaderInfo.style.display = "block";
+       uploaderStatus.textContent = "Room created. Waiting for receiver to join...";
+
+       // Start 5-minute OTP timer
+       startOTPTimer(5 * 60); // 5 minutes = 300 seconds
+      });
+
+      function startOTPTimer(seconds) {
+       const display = document.getElementById("otpTimer");
+       let remaining = seconds;
+
+       // Update immediately
+       updateDisplay();
+
+       const interval = setInterval(() => {
+       remaining--;
+       updateDisplay();
+
+       if (remaining <= 0) {
+        clearInterval(interval);
+        display.textContent = "Expired";
+        alert("OTP expired! Please generate a new one.");
+        document.getElementById("sendBtn").disabled = true; // disable send button
+       }
+      }, 1000);
+
+  function updateDisplay() {
+    const mins = Math.floor(remaining / 60);
+    const secs = remaining % 60;
+    display.textContent = `${mins}:${secs < 10 ? "0" : ""}${secs}`;
+  }
+}
+
+
+
+      // peer joined notification
+      socket.on("peer-joined", ({ room }) => {
+        if (isUploader && room === currentRoom) {
+          uploaderStatus.textContent = "Receiver joined! You can send the file.";
+        }
+      });
+
+      // join result for receiver
+      joinBtn.onclick = () => {
+        const otp = (otpInput.value || "").trim();
+        if (!/^\d{4}$/.test(otp)) {
+          alert("Enter a 4-digit OTP");
+          return;
+        }
+        socket.emit("join-room", { otp });
+      };
+
+      socket.on("join-failed", ({ reason }) => {
+        alert("Join failed: " + reason);
+      });
+
+      socket.on("join-success", ({ room }) => {
+        currentRoom = room;
+        isUploader = false;
+        receiverInfo.style.display = "block";
+        receiverStatus.textContent = "Connected to room " + room + ". Waiting for file...";
+      });
+
+      socket.on("uploader-disconnected", () => {
+        receiverStatus.textContent = "Uploader disconnected.";
+      });
+
+      // ===== Uploader: sending file =====
+      sendBtn.onclick = async () => {
+        const f = fileInput.files[0];
+        if (!f) { alert("Choose a file first"); return; }
+        if (!currentRoom) { alert("Create a room first"); return; }
+        uploaderStatus.textContent = "Sending file...";
+        // set chunk size (can be tuned)
+        const chunkSize = CHUNK_SIZE;
+        socket.emit("file-meta", {
+          room: currentRoom,
+          name: f.name,
+          size: f.size,
+          type: f.type,
+          chunkSize
+        });
+
+        // read file in chunks using File.slice
+        const fileSize = f.size;
+        let offset = 0;
+        while (offset < fileSize) {
+          const slice = f.slice(offset, offset + chunkSize);
+          const arrayBuffer = await slice.arrayBuffer();
+          // send binary chunk using socket.io (it supports binary)
+          socket.emit("file-chunk", { room: currentRoom, chunk: arrayBuffer });
+          offset += arrayBuffer.byteLength;
+          const pct = Math.round((offset / fileSize) * 100);
+          progressBar.style.width = pct + "%";
+          progressText.textContent = `Sent ${offset} / ${fileSize} bytes (${pct}%)`;
+        }
+
+        socket.emit("file-end", { room: currentRoom });
+        uploaderStatus.textContent = "File sent.";
+      };
+
+      // ===== Receiver: receive meta & chunks, reconstruct file =====
+      let receiveBuffers = [];
+      let expectedSize = 0;
+      let receivedBytes = 0;
+      let recvFileName = "download.bin";
+      let recvMime = "";
+
+      socket.on("file-meta", ({ name, size, type, chunkSize }) => {
+        receiveBuffers = [];
+        expectedSize = size;
+        receivedBytes = 0;
+        recvFileName = name || recvFileName;
+        recvMime = type || "";
+        receiverStatus.textContent = `Receiving file "${recvFileName}" (${expectedSize} bytes)`;
+        recvProgress.style.display = "block";
+        recvBar.style.width = "0%";
+      });
+
+      // file-chunk arrives with binary chunk
+      socket.on("file-chunk", ({ chunk }) => {
+        // chunk arrives as an ArrayBuffer or Buffer (browser gives ArrayBuffer)
+        // append to array of ArrayBuffers
+        receiveBuffers.push(chunk);
+        receivedBytes += chunk.byteLength || chunk.length || 0;
+        const pct = expectedSize ? Math.round((receivedBytes / expectedSize) * 100) : 0;
+        recvBar.style.width = pct + "%";
+        recvProgressText.textContent = `${receivedBytes} / ${expectedSize} bytes (${pct}%)`;
+      });
+
+      socket.on("file-end", () => {
+        // assemble Blob
+        const blob = new Blob(receiveBuffers, { type: recvMime || "application/octet-stream" });
+        const url = URL.createObjectURL(blob);
+
+        // Create download link
+        fileReceive.innerHTML = "";
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = recvFileName;
+        a.textContent = `Download "${recvFileName}" (${Math.round(blob.size/1024)} KB)`;
+        a.style.display = "inline-block";
+        a.style.padding = "8px";
+        a.style.border = "1px solid #ccc";
+        a.style.borderRadius = "6px";
+        a.style.textDecoration = "none";
+        fileReceive.appendChild(a);
+
+        receiverStatus.textContent = "File ready to download.";
+        // cleanup
+        receiveBuffers = [];
+        expectedSize = 0;
+        receivedBytes = 0;
+      });
+
+      // small helpful logs (optional)
+      socket.on("connect_error", (err) => {
+        console.error("Socket connect error", err);
+      });
+
+  </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+  </body>
+</html>
