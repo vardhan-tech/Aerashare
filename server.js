@@ -12,7 +12,9 @@ let uniqueIPs = new Set();
 let visitorCount = 0;
 
 app.use((req, res, next) => {
-  const userIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  // Use X-Forwarded-For first, fallback to socket IP
+  const xff = req.headers['x-forwarded-for'];
+  const userIP = xff ? xff.split(',')[0].trim() : req.socket.remoteAddress;
 
   if (!uniqueIPs.has(userIP)) {
     uniqueIPs.add(userIP);
@@ -23,10 +25,15 @@ app.use((req, res, next) => {
     console.log(`🔁 Returning visitor from IP: ${userIP}`);
   }
 
-  next(); // continue to static files or other routes
+  next();
 });
 
-// Serve static files (frontend)
+// Optional endpoint to get visitor count from frontend
+app.get("/visitors", (req, res) => {
+  res.json({ totalVisitors: visitorCount });
+});
+
+// Serve static frontend files
 app.use(express.static("public"));
 
 // ========== File Sharing / OTP Logic ==========
