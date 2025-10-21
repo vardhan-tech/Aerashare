@@ -2,19 +2,19 @@ const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
-const path = require("path");
 
 const app = express();
 app.use(cors());
 
-// ========== Visitor Tracking Middleware ==========
+// Trust proxy headers for deployed servers
+app.set('trust proxy', true);
+
+// Visitor tracking
 let uniqueIPs = new Set();
 let visitorCount = 0;
 
 app.use((req, res, next) => {
-  // Use X-Forwarded-For first, fallback to socket IP
-  const xff = req.headers['x-forwarded-for'];
-  const userIP = xff ? xff.split(',')[0].trim() : req.socket.remoteAddress;
+  const userIP = req.ip; // Express automatically uses X-Forwarded-For if trust proxy is true
 
   if (!uniqueIPs.has(userIP)) {
     uniqueIPs.add(userIP);
@@ -28,21 +28,20 @@ app.use((req, res, next) => {
   next();
 });
 
-// Optional endpoint to get visitor count from frontend
+// Optional endpoint to fetch visitor count
 app.get("/visitors", (req, res) => {
   res.json({ totalVisitors: visitorCount });
 });
 
-// Serve static frontend files
+// Serve frontend files
 app.use(express.static("public"));
 
-// ========== File Sharing / OTP Logic ==========
+// ========== File sharing / Socket.IO ==========
 const server = http.createServer(app);
 const io = new Server(server);
 
 const otpMap = new Map();
 
-// Generate unique 4-digit OTP
 function genOTP() {
   let otp;
   do {
@@ -51,7 +50,6 @@ function genOTP() {
   return otp;
 }
 
-// Cleanup old OTPs every minute (older than 5 minutes)
 setInterval(() => {
   const now = Date.now();
   for (const [otp, info] of otpMap) {
@@ -106,4 +104,4 @@ io.on("connection", (socket) => {
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`Server listening on http://localhost:${PORT}`));
+server.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
