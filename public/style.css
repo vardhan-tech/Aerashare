@@ -1,10 +1,15 @@
 * {
     margin: 0;
     padding: 0;
+    font-family: sans-serif;
 }
 
 #fileInput {
       display: none;
+}
+
+#hbtn {
+  display: none;
 }
 
 /* Style the clickable image */
@@ -55,6 +60,10 @@
     justify-content: center;
     align-items: flex-start;
     align-content: center;
+}
+
+#us {
+  margin-right: 10px;
 }
 
 #progress {

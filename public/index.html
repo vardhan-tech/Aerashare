@@ -49,14 +49,14 @@
 </svg>
       <input id="fileInput" type="file" /> 
       <p id="click" style="display: flex; justify-content: center;">Click the icon</p>
-      <p id="msg" style="margin: 15px; display: none; justify-content: center;">Your file is ready to share. Click th button below </p>
+      <div style="display: flex; justify-content: center; margin-left: 12px; gap:4px"><div id="fileName"></div><div id="status-txt" style="display: none">file is selected click the button below 2 times.</div></div>
 
            <!-- second page -->
 
   <div id="uploaderInfo">
         <div id="otp-d" style="display: flex; flex-direction: row; gap:10px"><h2>OTP:</h2> <h2><strong id="otpDisplay"></strong></h2></div>
         <p><small>OTP expires in <span id="otpTimer">5:00</span></small></p>
-        <div style="margin-top:6px;">Status: <span id="uploaderStatus">Waiting for receiver...</span></div>
+        <div id="us" style="margin-top:6px;">Status: <span id="uploaderStatus">Waiting for receiver...</span></div>
         <div style="margin-top:8px;">
           <div id="progress" style="width:300px; height:14px; background:#ddd; border-radius:8px; overflow:hidden;"><div id="bar" style="width:0%; height:100%; background:#2196F3; border-radius:8px;"></div></div>
           <small id="progressText"></small>
@@ -100,26 +100,37 @@
 
    const createBtn = document.getElementById('createBtn');
    const click = document.getElementById('click');
-   const msg = document.getElementById('msg');
+   const  sttxt = document.getElementById('status-txt');
    const sendBtn = document.getElementById('sendBtn');
    const plus = document.getElementById('plus-icon');
    const sendTxt = document.getElementById('send-txt');
    const uploaderInfo = document.getElementById('uploaderInfo');
+   const input = document.getElementById('fileInput');
+   const fileNameDiv = document.getElementById('fileName');
 
 
+   
+   input.addEventListener('change', () => {
+    const file = input.files[0]; // get the first selected file
+    if (file) {
+      click.style.display = "none";
+      sttxt.style.display = "flex";
+      fileNameDiv.textContent = file.name; // display its name
+      } 
+    });
     // Add click event to the image
     plus.addEventListener('click', function () {
       document.getElementById('fileInput').click(); // Trigger the file input
     });
 
-    createBtn.addEventListener('click', function () {
-    plus.style.display = "none";
-    sendTxt.style.display = "none";
-    createBtn.style.display = "none";
-    sendBtn.style.display = "flex";
-    uploaderInfo.style.display = "flex";
-    click.style.display = "none"
-   })
+    //createBtn.addEventListener('click', function () {
+    //plus.style.display = "none";
+    //sendTxt.style.display = "none";
+    //createBtn.style.display = "none";
+    //sendBtn.style.display = "flex";
+    //uploaderInfo.style.display = "flex";
+    //click.style.display = "none"
+   //})
 
    const fileInput = document.getElementById("fileInput");
    const otpDisplay = document.getElementById("otpDisplay");
@@ -142,8 +153,33 @@
       let CHUNK_SIZE = 64 * 1024; // 64KB default chunk size on client side
 
       createBtn.onclick = () => {
-        socket.emit("create-room");
-      };
+  const f = fileInput.files[0];
+  if (!f) { 
+    alert("Choose a file first"); 
+    return; 
+  }
+
+  // Hide everything not needed after file is chosen
+  plus.style.display = "none";           // hide plus icon
+  sendTxt.style.display = "none";        // hide "Send file" text
+  createBtn.style.display = "none";      // hide create button
+  sttxt.style.display = "none";          // hide status text
+  fileName.style.display = "none";       // hide filename text (not fileNameDiv)
+  click.style.display = "none";          // hide click hint
+
+  // Show elements for the next step
+  sendBtn.style.display = "flex";        // show Send button
+  uploaderInfo.style.display = "flex";   // show upload info container
+
+  // Optional: if you want to reset visual layout
+  document.querySelectorAll('.upload-section *').forEach(el => {
+    el.style.margin = "0";
+  });
+
+  // Now emit to server
+  socket.emit("create-room");
+};
+
 
       socket.on("room-created", ({ otp }) => {
        isUploader = true;
@@ -219,7 +255,6 @@
       // ===== Uploader: sending file =====
       sendBtn.onclick = async () => {
         const f = fileInput.files[0];
-        if (!f) { alert("Choose a file first"); return; }
         if (!currentRoom) { alert("Create a room first"); return; }
         uploaderStatus.textContent = "Sending file...";
         // set chunk size (can be tuned)
