@@ -49,7 +49,7 @@
 </svg>
       <input id="fileInput" type="file" /> 
       <p id="click" style="display: flex; justify-content: center;">Click the icon</p>
-      <div style="display: flex; justify-content: center; margin-left: 12px; gap:4px"><div id="fileName"></div><div id="status-txt" style="display: none">file is selected click the button below 2 times.</div></div>
+      <div style="display: flex; justify-content: center; margin-left: 12px; gap:4px"><div id="fileName"></div><div id="status-txt" style="display: none">Your file is ready to share click the button below.</div></div>
 
            <!-- second page -->
 
@@ -115,7 +115,6 @@
     if (file) {
       click.style.display = "none";
       sttxt.style.display = "flex";
-      fileNameDiv.textContent = file.name; // display its name
       } 
     });
     // Add click event to the image
