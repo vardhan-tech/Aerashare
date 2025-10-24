@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://aerashare-webapp.onrender.com/sitemap.xml
